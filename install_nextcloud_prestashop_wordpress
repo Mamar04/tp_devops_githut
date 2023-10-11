@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Variables
+DB_ROOT_PASS="mot_de_passe_root_mysql"
+DB_USER="nom_utilisateur_db"
+DB_PASS="mot_de_passe_db"
+WEBSITE_DOMAIN="votre_domaine"
+WORDPRESS_PATH="/var/www/wordpress"
+PRESTASHOP_PATH="/var/www/prestashop"
+NEXTCLOUD_PATH="/var/www/nextcloud"
+
+# Mise à jour du système
+sudo apt update
+sudo apt upgrade -y
+
+# Installation des paquets nécessaires
+sudo apt install -y apache2 mysql-server mysql-client php libapache2-mod-php php-mysql php-gd php-curl php-mbstring php-xml php-zip unzip
+
+# Configuration de MySQL
+sudo mysql -u root -p$DB_ROOT_PASS -e "CREATE DATABASE wordpress_db;"
+sudo mysql -u root -p$DB_ROOT_PASS -e "CREATE DATABASE prestashop_db;"
+sudo mysql -u root -p$DB_ROOT_PASS -e "CREATE DATABASE nextcloud_db;"
+sudo mysql -u root -p$DB_ROOT_PASS -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';"
+sudo mysql -u root -p$DB_ROOT_PASS -e "GRANT ALL ON wordpress_db.* TO '$DB_USER'@'localhost';"
+sudo mysql -u root -p$DB_ROOT_PASS -e "GRANT ALL ON prestashop_db.* TO '$DB_USER'@'localhost';"
+sudo mysql -u root -p$DB_ROOT_PASS -e "GRANT ALL ON nextcloud_db.* TO '$DB_USER'@'localhost';"
+sudo mysql -u root -p$DB_ROOT_PASS -e "FLUSH PRIVILEGES;"
+
+# Téléchargement et configuration de WordPress
+sudo mkdir $WORDPRESS_PATH
+sudo chown -R www-data:www-data $WORDPRESS_PATH
+wget https://wordpress.org/latest.tar.gz
+tar -xzf latest.tar.gz -C $WORDPRESS_PATH --strip-components=1
+cp $WORDPRESS_PATH/wp-config-sample.php $WORDPRESS_PATH/wp-config.php
+sed -i "s/database_name_here/wordpress_db/g" $WORDPRESS_PATH/wp-config.php
+sed -i "s/username_here/$DB_USER/g" $WORDPRESS_PATH/wp-config.php
+sed -i "s/password_here/$DB_PASS/g" $WORDPRESS_PATH/wp-config.php
+sudo service apache2 restart
+
+# Téléchargement et configuration de PrestaShop
+sudo mkdir $PRESTASHOP_PATH
+sudo chown -R www-data:www-data $PRESTASHOP_PATH
+wget https://download.prestashop.com/download/releases/prestashop_1.7.8.4.zip
+unzip prestashop_1.7.8.4.zip -d $PRESTASHOP_PATH
+sudo chown -R www-data:www-data $PRESTASHOP_PATH
+sudo chmod -R 755 $PRESTASHOP_PATH
+sudo chmod -R 775 $PRESTASHOP_PATH/var
+sudo chmod -R 775 $PRESTASHOP_PATH/app
+sudo chmod -R 775 $PRESTASHOP_PATH/config
+sudo chmod -R 775 $PRESTASHOP_PATH/translations
+sudo chmod -R 775 $PRESTASHOP_PATH/upload
+sudo chmod -R 775 $PRESTASHOP_PATH/download
+sudo chmod -R 775 $PRESTASHOP_PATH/img
+sudo chmod -R 775 $PRESTASHOP_PATH/mails
+sudo chmod -R 775 $PRESTASHOP_PATH/modules
+sudo chmod -R 775 $PRESTASHOP_PATH/themes
+sudo chmod -R 775 $PRESTASHOP_PATH/translations
+sudo chmod -R 775 $PRESTASHOP_PATH/adminXXXX
+sudo chmod -R 775 $PRESTASHOP_PATH/autoupgrade
+sudo service apache2 restart
+
+# Téléchargement et configuration de Nextcloud
+sudo mkdir $NEXTCLOUD_PATH
+sudo chown -R www-data:www-data $NEXTCLOUD_PATH
+wget https://download.nextcloud.com/server/releases/latest.zip
+unzip latest.zip -d $NEXTCLOUD_PATH
+sudo chown -R www-data:www-data $NEXTCLOUD_PATH
+sudo service apache2 restart
