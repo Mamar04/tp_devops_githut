@@ -124,3 +124,7 @@ cat <<EOL > /etc/apache2/sites-available/prestashop.conf
 </VirtualHost>
 EOL
 # activation des vhost
+
+a2ensite nexcloud.conf
+a2ensite wordpress.conf
+a2ensite prestashop.conf
