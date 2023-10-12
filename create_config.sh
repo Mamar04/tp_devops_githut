@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "bisou Olivier"
 cat <<EOL > /etc/apache2/sites-available/nexcloud.conf
 <VirtualHost *:80>
     ServerAdmin mamar.mmoumouni@gmail.com
